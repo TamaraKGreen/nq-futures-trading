@@ -67,18 +67,8 @@ class TradingSystem:
         # Load configuration
         self.config = get_config(config_file)
         
-        # Validate configuration (will raise ConfigurationError if API key missing in fail-fast mode)
-        validation = self.config.validate_config()
-        if not validation['valid']:
-            error_msg = "Configuration validation failed:\n"
-            for issue in validation['issues']:
-                error_msg += f"  - {issue}\n"
-            raise ConfigurationError(error_msg)
-        
-        if validation['warnings']:
-            logger.warning("Configuration warnings:")
-            for warning in validation['warnings']:
-                logger.warning(f"  - {warning}")
+        # Validate configuration using centralized validation (will raise ConfigurationError if invalid)
+        self.config.ensure_valid_config("production_system_init")
         
         # Initialize core components
         self.coordinator = create_coordinator(
@@ -148,15 +138,8 @@ class TradingSystem:
             self.performance_monitor.start_monitoring(30)
             self.performance_monitor.track_component("trading_system")
             
-            # Validate system configuration
-            validation = self.config.validate_config()
-            if not validation['valid']:
-                error_msg = f"Configuration validation failed: {validation['issues']}"
-                if self.config.fail_fast.enable_fail_fast:
-                    raise ConfigurationError(error_msg)
-                else:
-                    logger.error(error_msg)
-                    return
+            # Validate system configuration using centralized validation
+            self.config.ensure_valid_config("production_system_startup")
             
             # Check and fill data gaps
             await self._check_and_fill_gaps(symbols)

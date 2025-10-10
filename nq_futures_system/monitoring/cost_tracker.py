@@ -49,32 +49,39 @@ class MonthlyCostSummary:
 class CostTracker:
     """Tracks and analyzes API costs and cache savings."""
     
-    def __init__(self, storage_dir: str = "monitoring/costs"):
+    def __init__(self, storage_dir: str = "monitoring/costs", config=None):
         """
         Initialize cost tracker.
         
         Args:
             storage_dir: Directory to store cost data
+            config: Configuration object (uses default if None)
         """
         self.storage_dir = Path(storage_dir)
         self.storage_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Get configuration
+        if config is None:
+            from nq_futures_system.config.settings import get_config
+            config = get_config()
+        self.config = config
         
         # Cost tracking
         self.cost_entries: List[CostEntry] = []
         self.monthly_summaries: Dict[str, MonthlyCostSummary] = {}
         self.lock = threading.RLock()
         
-        # Cost rates (USD)
-        self.cost_rates = {
-            'trades': 0.20,      # Per day
-            'ohlcv-1m': 0.02,    # Per day
-            'ohlcv-1h': 0.01,    # Per day
-            'bbo': 0.15,         # Per day
-            'mbp-1': 0.10,       # Per day
-        }
+        # Get cost rates from canonical configuration
+        # Combine API base costs with schema multipliers
+        self.cost_rates = {}
+        for schema, multiplier in self.config.trading.get_schema_cost_rates.items():
+            # Use base cost from API settings, applied with schema multiplier
+            base_cost = getattr(self.config.api, f"cost_per_{schema.replace('-', '_')}_day", 
+                              self.config.api.cost_per_trade_day)  # Default to trade cost
+            self.cost_rates[schema] = base_cost * multiplier
         
-        # Budget settings
-        self.monthly_budget = 100.0  # USD
+        # Budget settings from configuration
+        self.monthly_budget = self.config.api.monthly_budget_usd
         self.warning_threshold = 0.8  # 80% of budget
         
         # Load existing data

@@ -143,14 +143,10 @@ def validate_dataframe_structure(df: pd.DataFrame, schema: str = "trades") -> bo
     if df is None or df.empty:
         raise DataQualityError("DataFrame is None or empty")
     
-    # Schema-specific validation
-    schema_requirements = {
-        "trades": ["ts_event", "ts_recv", "price", "size"],
-        "ohlcv-1m": ["ts_event", "open", "high", "low", "close", "volume"],
-        "ohlcv-1h": ["ts_event", "open", "high", "low", "close", "volume"],
-        "bbo": ["ts_event", "ts_recv", "bid_px", "ask_px", "bid_sz", "ask_sz"],
-        "mbp-1": ["ts_event", "ts_recv", "price", "size", "action", "side"]
-    }
+    # Get schema requirements from canonical configuration
+    from nq_futures_system.config.settings import get_config
+    config = get_config()
+    schema_requirements = config.trading.get_schema_validator_rules
     
     if schema in schema_requirements:
         required_columns = schema_requirements[schema]
@@ -294,11 +290,10 @@ def validate_schema_format(schema: str) -> bool:
     
     schema = schema.strip().lower()
     
-    # Valid schema formats
-    valid_schemas = {
-        'trades', 'quotes', 'ohlcv-1s', 'ohlcv-1m', 'ohlcv-5m', 'ohlcv-15m', 
-        'ohlcv-1h', 'ohlcv-1d', 'bbo', 'mbp-1', 'mbp-10', 'tbbo', 'statistics'
-    }
+    # Get valid schemas from canonical configuration
+    from nq_futures_system.config.settings import get_config
+    config = get_config()
+    valid_schemas = set(config.trading.valid_schemas)
     
     if schema not in valid_schemas:
         raise InputValidationError(f"Invalid schema: {schema}. Valid schemas: {valid_schemas}")

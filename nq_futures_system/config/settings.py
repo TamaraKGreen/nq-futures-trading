@@ -11,7 +11,7 @@ Provides centralized configuration with:
 
 import os
 import json
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict
 from pathlib import Path
 import logging
@@ -117,6 +117,32 @@ class TradingSettings:
         # Valid schemas list for validation
         if self.valid_schemas is None:
             self.valid_schemas = list(self.schema_definitions.keys())
+    
+    @property
+    def get_schema_validator_rules(self) -> Dict[str, List[str]]:
+        """
+        Extract validation rules from canonical schema definitions.
+        
+        Returns:
+            Dictionary mapping schema names to required column lists
+        """
+        return {
+            schema: definition["required_columns"] 
+            for schema, definition in self.schema_definitions.items()
+        }
+    
+    @property
+    def get_schema_cost_rates(self) -> Dict[str, float]:
+        """
+        Extract cost rates from canonical schema definitions.
+        
+        Returns:
+            Dictionary mapping schema names to cost multiplier rates
+        """
+        return {
+            schema: definition["cost_multiplier"]
+            for schema, definition in self.schema_definitions.items()
+        }
 
 
 @dataclass
@@ -309,6 +335,40 @@ class ConfigManager:
             if hasattr(self.api, key):
                 setattr(self.api, key, value)
                 logger.info(f"Updated api.{key} = {value}")
+    
+    def ensure_valid_config(self, context: str = "system") -> None:
+        """
+        Centralized configuration validation with consistent error handling.
+        
+        This method provides a unified way to validate configuration across
+        all system components, ensuring consistent error behavior.
+        
+        Args:
+            context: Context for error reporting (e.g., "production_system", "deployment")
+            
+        Raises:
+            ConfigurationError: If configuration validation fails
+        """
+        validation = self.validate_config()
+        
+        if not validation['valid']:
+            error_msg = f"Configuration validation failed in {context}:\n"
+            for issue in validation['issues']:
+                error_msg += f"  - {issue}\n"
+            
+            # Always raise ConfigurationError for config issues - these are critical
+            if self.fail_fast.enable_fail_fast:
+                logger.error(f"FAIL-FAST [{context}]: {error_msg}")
+                raise ConfigurationError(f"FAIL-FAST: {error_msg}")
+            else:
+                logger.error(f"[{context}]: {error_msg}")
+                raise ConfigurationError(error_msg)
+        
+        # Log warnings if present
+        if validation['warnings']:
+            logger.warning(f"Configuration warnings in {context}:")
+            for warning in validation['warnings']:
+                logger.warning(f"  - {warning}")
     
     def validate_config(self) -> Dict[str, Any]:
         """
