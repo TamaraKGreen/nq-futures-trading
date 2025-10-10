@@ -1,0 +1,157 @@
+{
+  "cost_entries": [
+    {
+      "timestamp": "2025-10-10 01:05:03.306908",
+      "operation_type": "api_call",
+      "symbol": "NQZ5",
+      "schema": "trades",
+      "cost_usd": 0.2,
+      "api_calls_count": 1,
+      "data_volume_mb": 15.5,
+      "cache_hit": false
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307181",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "trades",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 15.5,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307202",
+      "operation_type": "api_call",
+      "symbol": "NQH6",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.02,
+      "api_calls_count": 1,
+      "data_volume_mb": 2.1,
+      "cache_hit": false
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307247",
+      "operation_type": "batch_api_call",
+      "symbol": "ESZ5",
+      "schema": "trades",
+      "cost_usd": 1.0,
+      "api_calls_count": 5,
+      "data_volume_mb": 75.0,
+      "cache_hit": false
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307267",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307281",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307291",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307300",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307308",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307316",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307324",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307333",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307341",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    },
+    {
+      "timestamp": "2025-10-10 01:05:03.307349",
+      "operation_type": "cache_hit",
+      "symbol": "NQZ5",
+      "schema": "ohlcv-1m",
+      "cost_usd": 0.0,
+      "api_calls_count": 0,
+      "data_volume_mb": 1.0,
+      "cache_hit": true
+    }
+  ],
+  "monthly_summaries": {
+    "2025-10": {
+      "month": "2025-10",
+      "total_cost": 1.22,
+      "api_calls": 7,
+      "cache_hits": 11,
+      "cache_misses": 3,
+      "cache_savings": 0.40000000000000013,
+      "data_volume_gb": 0.11533203125,
+      "top_expensive_symbols": []
+    }
+  },
+  "last_updated": "2025-10-10T01:21:47.752274"
+}

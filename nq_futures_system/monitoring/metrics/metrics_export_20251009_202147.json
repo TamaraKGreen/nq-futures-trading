@@ -1,0 +1,60 @@
+{
+  "export_timestamp": "2025-10-10T01:21:47.753117",
+  "metrics_summary": {
+    "system_cpu_percent": {
+      "count": 1,
+      "sum": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last_value": 0.0,
+      "last_updated": "2025-10-10 01:21:38.766283",
+      "avg": 0.0
+    },
+    "system_memory_percent": {
+      "count": 1,
+      "sum": 69.0,
+      "min": 69.0,
+      "max": 69.0,
+      "last_value": 69.0,
+      "last_updated": "2025-10-10 01:21:38.766346",
+      "avg": 69.0
+    },
+    "system_memory_mb": {
+      "count": 1,
+      "sum": 9684.65625,
+      "min": 9684.65625,
+      "max": 9684.65625,
+      "last_value": 9684.65625,
+      "last_updated": "2025-10-10 01:21:38.766383",
+      "avg": 9684.65625
+    },
+    "main_loop_iteration_duration": {
+      "count": 1,
+      "sum": 8.106231689453125e-06,
+      "min": 8.106231689453125e-06,
+      "max": 8.106231689453125e-06,
+      "last_value": 8.106231689453125e-06,
+      "last_updated": "2025-10-10 01:21:40.006781",
+      "avg": 8.106231689453125e-06
+    }
+  },
+  "recent_alerts": [],
+  "system_health": {
+    "health_score": 100,
+    "status": "excellent",
+    "alert_summary": {
+      "info": 0,
+      "warning": 0,
+      "error": 0,
+      "critical": 0
+    },
+    "recent_alerts_count": 0,
+    "tracked_components": [
+      "trading_system"
+    ],
+    "monitoring_active": false
+  },
+  "tracked_components": [
+    "trading_system"
+  ]
+}

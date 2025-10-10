@@ -1,0 +1,80 @@
+{
+  "export_timestamp": "2025-10-10T01:03:30.505632",
+  "metrics_summary": {
+    "cache_efficiency": {
+      "count": 1,
+      "sum": 85.5,
+      "min": 85.5,
+      "max": 85.5,
+      "last_value": 85.5,
+      "last_updated": "2025-10-10 01:03:30.401031",
+      "avg": 85.5
+    },
+    "api_response_time": {
+      "count": 1,
+      "sum": 1.2,
+      "min": 1.2,
+      "max": 1.2,
+      "last_value": 1.2,
+      "last_updated": "2025-10-10 01:03:30.401350",
+      "avg": 1.2
+    },
+    "buffer_utilization": {
+      "count": 1,
+      "sum": 45.0,
+      "min": 45.0,
+      "max": 45.0,
+      "last_value": 45.0,
+      "last_updated": "2025-10-10 01:03:30.401372",
+      "avg": 45.0
+    },
+    "data_processing_duration": {
+      "count": 1,
+      "sum": 0.10391902923583984,
+      "min": 0.10391902923583984,
+      "max": 0.10391902923583984,
+      "last_value": 0.10391902923583984,
+      "last_updated": "2025-10-10 01:03:30.505342",
+      "avg": 0.10391902923583984
+    },
+    "api_requests_count": {
+      "count": 1,
+      "sum": 5.0,
+      "min": 5,
+      "max": 5,
+      "last_value": 5,
+      "last_updated": "2025-10-10 01:03:30.505423",
+      "avg": 5.0
+    },
+    "cache_hits_count": {
+      "count": 1,
+      "sum": 4.0,
+      "min": 4,
+      "max": 4,
+      "last_value": 4,
+      "last_updated": "2025-10-10 01:03:30.505437",
+      "avg": 4.0
+    }
+  },
+  "recent_alerts": [],
+  "system_health": {
+    "health_score": 100,
+    "status": "excellent",
+    "alert_summary": {
+      "info": 0,
+      "warning": 0,
+      "error": 0,
+      "critical": 0
+    },
+    "recent_alerts_count": 0,
+    "tracked_components": [
+      "unified_coordinator",
+      "cache_manager"
+    ],
+    "monitoring_active": false
+  },
+  "tracked_components": [
+    "unified_coordinator",
+    "cache_manager"
+  ]
+}

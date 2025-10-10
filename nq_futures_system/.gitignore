@@ -1,0 +1,36 @@
+# Environment files
+.env
+config/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# Data files
+*.csv
+*.parquet
+*.pickle
+*.db
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Backtesting reports
+backtesting/reports/*.html
+backtesting/reports/*.pdf
+
+# Redis dump
+dump.rdb

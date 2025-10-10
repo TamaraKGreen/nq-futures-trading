@@ -1,0 +1,42 @@
+{
+  "daily_files": {
+    "NQZ5_trades": {
+      "2024-08-01": {
+        "file": "data/cache/daily/NQZ5_2024-08-01_trades.parquet",
+        "rows": 50000,
+        "cached_at": "2025-10-09T19:13:23.526708"
+      },
+      "2024-08-02": {
+        "file": "data/cache/daily/NQZ5_2024-08-02_trades.parquet",
+        "rows": 50000,
+        "cached_at": "2025-10-09T19:13:23.542542"
+      },
+      "2024-08-05": {
+        "file": "data/cache/daily/NQZ5_2024-08-05_trades.parquet",
+        "rows": 50000,
+        "cached_at": "2025-10-09T19:13:23.554244"
+      },
+      "2024-08-06": {
+        "file": "data/cache/daily/NQZ5_2024-08-06_trades.parquet",
+        "rows": 50000,
+        "cached_at": "2025-10-09T19:13:23.567200"
+      },
+      "2024-08-07": {
+        "file": "data/cache/daily/NQZ5_2024-08-07_trades.parquet",
+        "rows": 50000,
+        "cached_at": "2025-10-09T19:13:23.579987"
+      },
+      "2024-08-08": {
+        "file": "data/cache/daily/NQZ5_2024-08-08_trades.parquet",
+        "rows": 50000,
+        "cached_at": "2025-10-09T19:13:23.593493"
+      },
+      "2024-08-09": {
+        "file": "data/cache/daily/NQZ5_2024-08-09_trades.parquet",
+        "rows": 50000,
+        "cached_at": "2025-10-09T19:13:23.605233"
+      }
+    }
+  },
+  "last_update": null
+}
