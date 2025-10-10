@@ -26,14 +26,14 @@ from typing import Optional
 import os
 
 # Import all production components
-from data.unified_data_coordinator import UnifiedDataCoordinator, create_coordinator
-from monitoring.performance_monitor import PerformanceMonitor, get_performance_monitor
-from monitoring.cost_tracker import CostTracker, create_cost_tracker
-from config.settings import get_config
-from scripts.daily_update import DailyDataUpdater
-from utils.gap_detector import GapDetector
-from utils.cache_cleanup import CacheCleanupManager
-from utils.validators import StrictModeEnforcer, ValidationError, validate_connection_health
+from nq_futures_system.data.unified_data_coordinator import UnifiedDataCoordinator, create_coordinator
+from nq_futures_system.monitoring.performance_monitor import PerformanceMonitor, get_performance_monitor
+from nq_futures_system.monitoring.cost_tracker import CostTracker, create_cost_tracker
+from nq_futures_system.config.settings import get_config
+from nq_futures_system.scripts.daily_update import DailyDataUpdater
+from nq_futures_system.utils.gap_detector import GapDetector
+from nq_futures_system.utils.cache_cleanup import CacheCleanupManager
+from nq_futures_system.utils.validators import StrictModeEnforcer, ValidationError, ConfigurationError, ConnectionError, CacheError, validate_connection_health, validate_environment
 
 # Configure logging
 logging.basicConfig(
@@ -66,6 +66,19 @@ class TradingSystem:
         
         # Load configuration
         self.config = get_config(config_file)
+        
+        # Validate configuration (will raise ConfigurationError if API key missing in fail-fast mode)
+        validation = self.config.validate_config()
+        if not validation['valid']:
+            error_msg = "Configuration validation failed:\n"
+            for issue in validation['issues']:
+                error_msg += f"  - {issue}\n"
+            raise ConfigurationError(error_msg)
+        
+        if validation['warnings']:
+            logger.warning("Configuration warnings:")
+            for warning in validation['warnings']:
+                logger.warning(f"  - {warning}")
         
         # Initialize core components
         self.coordinator = create_coordinator(
@@ -140,7 +153,7 @@ class TradingSystem:
             if not validation['valid']:
                 error_msg = f"Configuration validation failed: {validation['issues']}"
                 if self.config.fail_fast.enable_fail_fast:
-                    raise ValidationError(error_msg)
+                    raise ConfigurationError(error_msg)
                 else:
                     logger.error(error_msg)
                     return
@@ -404,7 +417,7 @@ class TradingSystem:
     
     async def _validate_api_connectivity(self):
         """
-        Validate API connectivity and authentication.
+        Validate API connectivity and authentication using central validator.
         
         Raises:
             ValidationError: If API connectivity fails
@@ -412,31 +425,35 @@ class TradingSystem:
         logger.debug("Validating API connectivity...")
         
         try:
-            # Test basic API connectivity with a minimal request
-            test_start = datetime.now() - timedelta(days=1)
-            test_end = test_start + timedelta(minutes=5)
-            
-            # Make a small test request to verify connectivity
-            test_data = self.coordinator.cached_client.get_historical_data(
-                symbol="NQU4",
-                start=test_start,
-                end=test_end,
-                schema="ohlcv-1m"
+            # Use central connection health validation
+            health_result = validate_connection_health(
+                client=self.coordinator.cached_client,
+                timeout_seconds=10
             )
             
-            if test_data is None or len(test_data) == 0:
+            if health_result['healthy']:
+                logger.debug(f"API connectivity validated: "
+                           f"{health_result['response_time_ms']:.1f}ms response time, "
+                           f"auth_valid={health_result['auth_valid']}")
+            else:
+                # If not healthy, the issues are already logged by validate_connection_health
+                # In fail-fast mode, validate_connection_health will have already raised ConnectionError
+                # In non-fail-fast mode, we should log warnings but continue
+                for issue in health_result['issues']:
+                    logger.warning(f"Connection issue: {issue}")
+                
                 if self.config.fail_fast.enable_fail_fast:
-                    raise ValidationError("API connectivity test failed: No data returned")
-                else:
-                    logger.warning("API connectivity test returned no data")
-            
-            logger.debug(f"API connectivity validated: {len(test_data)} test records retrieved")
-            
+                    # This shouldn't happen as validate_connection_health should have raised
+                    raise ConnectionError(f"API connectivity unhealthy: {'; '.join(health_result['issues'])}")
+                    
+        except ConnectionError as e:
+            # ConnectionError from validate_connection_health indicates critical failure
+            raise ConnectionError(f"API connectivity validation failed: {e}")
         except Exception as e:
             error_msg = f"API connectivity validation failed: {e}"
             if self.config.fail_fast.enable_fail_fast:
                 logger.error(f"FAIL-FAST: {error_msg}")
-                raise ValidationError(error_msg)
+                raise ConnectionError(error_msg)
             else:
                 logger.warning(error_msg)
     
@@ -470,7 +487,7 @@ class TradingSystem:
             error_msg = f"Cache access validation failed: {e}"
             if self.config.fail_fast.enable_fail_fast:
                 logger.error(f"FAIL-FAST: {error_msg}")
-                raise ValidationError(error_msg)
+                raise CacheError(error_msg)
             else:
                 logger.warning(error_msg)
     
@@ -499,43 +516,52 @@ class TradingSystem:
                 error_msg = f"Insufficient disk space: {free_mb:.1f} MB available, {required_mb:.1f} MB required"
                 if self.config.fail_fast.enable_fail_fast:
                     logger.error(f"FAIL-FAST: {error_msg}")
-                    raise ValidationError(error_msg)
+                    raise CacheError(error_msg)
                 else:
                     logger.warning(error_msg)
             
             logger.debug(f"Disk space validated: {free_mb:.1f} MB available")
             
-        except ValidationError:
+        except CacheError:
             raise
         except Exception as e:
             error_msg = f"Disk space validation failed: {e}"
             if self.config.fail_fast.enable_fail_fast:
                 logger.error(f"FAIL-FAST: {error_msg}")
-                raise ValidationError(error_msg)
+                raise CacheError(error_msg)
             else:
                 logger.warning(error_msg)
     
     def _validate_environment_variables(self):
         """
-        Validate required environment variables.
+        Validate required environment variables using central validator.
         
         Raises:
             ValidationError: If required environment variables are missing
         """
         logger.debug("Validating environment variables...")
         
-        required_vars = {
-            'DATABENTO_API_KEY': 'Databento API authentication'
-        }
-        
-        missing_vars = []
-        
-        for var_name, description in required_vars.items():
-            if not os.getenv(var_name):
-                missing_vars.append(f"{var_name} ({description})")
-        
-        if missing_vars:
-            error_msg = f"Missing required environment variables: {', '.join(missing_vars)}"
+        try:
+            # Use central environment validation
+            env_result = validate_environment()
+            
+            if env_result['valid']:
+                logger.debug("Environment variables validated successfully")
+            else:
+                # Log issues
+                for issue in env_result['issues']:
+                    logger.warning(f"Environment issue: {issue}")
+                
+                # In fail-fast mode, validate_environment should have already raised
+                # But if we get here, raise ValidationError for consistency
+                if self.config.fail_fast.enable_fail_fast:
+                    raise ValidationError(f"Environment validation failed: {'; '.join(env_result['issues'])}")
+                    
+        except ValidationError:
+            # Re-raise ValidationError from validate_environment
+            raise
+        except Exception as e:
+            error_msg = f"Environment validation failed: {e}"
             if self.config.fail_fast.enable_fail_fast:
                 logger.error(f"FAIL-FAST: {error_msg}")
                 raise ValidationError(error_msg)
@@ -631,12 +657,6 @@ async def main():
     )
     
     args = parser.parse_args()
-    
-    # Check for API key
-    if not os.getenv('DATABENTO_API_KEY'):
-        print("❌ Error: DATABENTO_API_KEY environment variable not set")
-        print("   Please set your Databento API key in the environment")
-        return 1
     
     try:
         # Initialize system

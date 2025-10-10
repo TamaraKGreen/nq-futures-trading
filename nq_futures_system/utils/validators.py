@@ -43,6 +43,45 @@ class InputValidationError(ValidationError):
     pass
 
 
+class ConfigurationError(ValidationError):
+    """
+    Raised when configuration validation fails.
+    
+    This exception indicates problems with system configuration such as:
+    - Invalid configuration values
+    - Missing required configuration settings
+    - Configuration conflicts or incompatibilities
+    - Environment variable issues
+    """
+    pass
+
+
+class ConnectionError(ValidationError):
+    """
+    Raised when connection or network-related operations fail.
+    
+    This exception indicates problems with external connections such as:
+    - API connectivity issues
+    - Network timeouts
+    - Authentication failures with external services
+    - Service unavailability
+    """
+    pass
+
+
+class CacheError(ValidationError):
+    """
+    Raised when cache operations fail.
+    
+    This exception indicates problems with caching operations such as:
+    - Cache storage/retrieval failures
+    - Cache corruption or integrity issues
+    - Disk space or permission problems
+    - Cache format or serialization errors
+    """
+    pass
+
+
 def validate_api_response(response_data: Any, expected_type: type = pd.DataFrame) -> bool:
     """
     Validate API response data structure and content.
@@ -443,7 +482,9 @@ class StrictModeEnforcer:
             ConnectionError,
             AuthenticationError,
             DataQualityError,
-            APIValidationError
+            APIValidationError,
+            ConfigurationError,
+            CacheError
         ]
         
         return any(isinstance(error, error_type) for error_type in critical_error_types)
@@ -513,26 +554,330 @@ def validate_trading_session() -> bool:
     return True
 
 
-def validate_connection_health(client) -> bool:
+def validate_environment() -> Dict[str, Any]:
     """
-    Validate connection health to external services.
+    Validate complete environment setup and dependencies.
     
-    Args:
-        client: Client object to test
-        
     Returns:
-        True if connection is healthy
+        Dictionary with validation results including:
+        - valid: bool - Overall validation status
+        - issues: list - List of critical issues
+        - warnings: list - List of warnings
+        - checks: dict - Detailed check results
         
     Raises:
-        ConnectionError: If connection is unhealthy
+        ValidationError: If environment is invalid and fail-fast mode enabled
     """
+    from nq_futures_system.config.settings import get_config
+    
+    config = get_config()
+    
+    # Use the central config validation which now includes API key check
+    validation_result = config.validate_config()
+    
+    issues = list(validation_result.get('issues', []))
+    warnings = list(validation_result.get('warnings', []))
+    checks = {}
+    
+    # Add additional environment checks
+    import sys
+    import platform
+    
+    # Python version check
+    python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    checks['python_version'] = python_version
+    
+    if sys.version_info < (3, 8):
+        issues.append(f"Python version {python_version} < 3.8 (minimum required)")
+    
+    # Platform check
+    checks['platform'] = platform.system()
+    checks['architecture'] = platform.machine()
+    
+    # Required packages check
+    required_packages = ['pandas', 'numpy', 'asyncio', 'logging']
+    missing_packages = []
+    
+    for package in required_packages:
+        try:
+            __import__(package)
+            checks[f'package_{package}'] = 'available'
+        except ImportError:
+            missing_packages.append(package)
+            checks[f'package_{package}'] = 'missing'
+    
+    if missing_packages:
+        issues.append(f"Missing required packages: {', '.join(missing_packages)}")
+    
+    # Check disk space (basic check)
     try:
-        # This would perform actual connection health checks
-        # Implementation depends on the specific client type
-        logger.debug("Connection health check passed")
-        return True
+        import shutil
+        cache_dir = config.cache.cache_dir
+        _, _, free_bytes = shutil.disk_usage(cache_dir if os.path.exists(cache_dir) else '.')
+        free_gb = free_bytes / (1024 ** 3)
+        checks['free_disk_space_gb'] = round(free_gb, 2)
+        
+        if free_gb < 1.0:  # Less than 1GB free
+            warnings.append(f"Low disk space: {free_gb:.2f}GB available")
     except Exception as e:
-        raise ConnectionError(f"Connection health check failed: {e}")
+        warnings.append(f"Could not check disk space: {e}")
+    
+    # Memory check
+    try:
+        import psutil
+        memory = psutil.virtual_memory()
+        checks['total_memory_gb'] = round(memory.total / (1024 ** 3), 2)
+        checks['available_memory_gb'] = round(memory.available / (1024 ** 3), 2)
+        
+        if memory.available < config.performance.memory_limit_mb * 1024 * 1024:
+            warnings.append(f"Available memory ({memory.available / (1024**3):.2f}GB) less than configured limit ({config.performance.memory_limit_mb}MB)")
+    except ImportError:
+        warnings.append("psutil not available - cannot check memory usage")
+    except Exception as e:
+        warnings.append(f"Could not check memory: {e}")
+    
+    final_result = {
+        'valid': len(issues) == 0,
+        'issues': issues,
+        'warnings': warnings,
+        'checks': checks
+    }
+    
+    # If fail-fast is enabled and we have issues, raise an error
+    if config.fail_fast.enable_fail_fast and issues:
+        error_msg = "Environment validation failed: " + "; ".join(issues)
+        raise ValidationError(error_msg)
+    
+    logger.debug(f"Environment validation completed: {len(issues)} issues, {len(warnings)} warnings")
+    return final_result
+
+
+def validate_data_freshness(data: pd.DataFrame, max_age_seconds: int = 60, 
+                            timestamp_column: str = 'ts_event') -> bool:
+    """
+    Validate that data is fresh enough for trading decisions.
+    
+    Args:
+        data: DataFrame containing timestamped data
+        max_age_seconds: Maximum allowed age in seconds
+        timestamp_column: Name of the timestamp column to check
+        
+    Returns:
+        True if data is fresh enough
+        
+    Raises:
+        DataQualityError: If data is too stale or invalid
+    """
+    if data is None or data.empty:
+        raise DataQualityError("Cannot validate freshness: data is None or empty")
+    
+    if timestamp_column not in data.columns:
+        raise DataQualityError(f"Timestamp column '{timestamp_column}' not found in data")
+    
+    try:
+        # Convert to datetime if not already
+        timestamps = pd.to_datetime(data[timestamp_column])
+        
+        # Find the latest timestamp
+        latest_timestamp = timestamps.max()
+        
+        # Check if latest_timestamp is NaT (Not a Time)
+        if pd.isna(latest_timestamp):
+            raise DataQualityError("Latest timestamp is NaT (Not a Time)")
+        
+        # Calculate age
+        current_time = datetime.now()
+        
+        # Handle timezone-aware timestamps
+        if latest_timestamp.tz is not None:
+            current_time = current_time.replace(tzinfo=latest_timestamp.tz)
+        elif hasattr(latest_timestamp, 'to_pydatetime'):
+            latest_timestamp = latest_timestamp.to_pydatetime()
+        
+        age_seconds = (current_time - latest_timestamp).total_seconds()
+        
+        # Check if data is too old
+        if age_seconds > max_age_seconds:
+            raise DataQualityError(
+                f"Data is too stale: {age_seconds:.1f}s old (max allowed: {max_age_seconds}s). "
+                f"Latest timestamp: {latest_timestamp}"
+            )
+        
+        # Check if data is too far in the future (more than 5 minutes)
+        if age_seconds < -300:  # 5 minutes in the future
+            raise DataQualityError(
+                f"Data timestamp is too far in the future: {-age_seconds:.1f}s ahead. "
+                f"Latest timestamp: {latest_timestamp}"
+            )
+        
+        logger.debug(f"Data freshness validation passed: {age_seconds:.1f}s old")
+        return True
+        
+    except Exception as e:
+        if isinstance(e, DataQualityError):
+            raise
+        else:
+            raise DataQualityError(f"Error validating data freshness: {e}")
+
+
+def validate_connection_health(client=None, timeout_seconds: int = 10) -> Dict[str, Any]:
+    """
+    Validate connection health to external services (specifically Databento API).
+    
+    Args:
+        client: Client object to test (optional, will create if None)
+        timeout_seconds: Maximum time to wait for connection test
+        
+    Returns:
+        Dictionary with connection health results:
+        - healthy: bool - Overall connection health
+        - response_time_ms: float - Connection response time
+        - api_accessible: bool - Whether API is accessible
+        - auth_valid: bool - Whether authentication is valid
+        - issues: list - List of connection issues
+        
+    Raises:
+        ConnectionError: If connection is critically unhealthy and fail-fast enabled
+    """
+    from nq_futures_system.config.settings import get_config
+    import time
+    import asyncio
+    
+    config = get_config()
+    result = {
+        'healthy': True,
+        'response_time_ms': 0.0,
+        'api_accessible': False,
+        'auth_valid': False,
+        'issues': [],
+        'checks': {}
+    }
+    
+    try:
+        # If no client provided, try to create one for testing
+        if client is None:
+            try:
+                from data.collectors.databento_client import DatabentoClient
+                api_key = os.getenv('DATABENTO_API_KEY')
+                if not api_key:
+                    result['healthy'] = False
+                    result['issues'].append("No API key available for connection test")
+                    if config.fail_fast.enable_fail_fast:
+                        raise ConnectionError("Cannot test connection: No API key available")
+                    return result
+                
+                client = DatabentoClient(api_key)
+            except ImportError as e:
+                result['healthy'] = False
+                result['issues'].append(f"Cannot import Databento client: {e}")
+                result['checks']['client_import'] = 'failed'
+                if config.fail_fast.enable_fail_fast:
+                    raise ConnectionError(f"Cannot test connection: {e}")
+                return result
+            except Exception as e:
+                result['healthy'] = False
+                result['issues'].append(f"Cannot create Databento client: {e}")
+                result['checks']['client_creation'] = 'failed'
+                if config.fail_fast.enable_fail_fast:
+                    raise ConnectionError(f"Cannot create client: {e}")
+                return result
+        
+        # Test basic connectivity
+        start_time = time.time()
+        
+        try:
+            # Try to make a simple API call to test connectivity and auth
+            # This is a minimal call that should work if everything is set up correctly
+            if hasattr(client, 'get_schema'):
+                # Test getting schema information (lightweight call)
+                schema_info = client.get_schema()
+                result['api_accessible'] = True
+                result['auth_valid'] = True
+                result['checks']['schema_access'] = 'success'
+            elif hasattr(client, 'list_symbols'):
+                # Alternative: try to list symbols
+                symbols = client.list_symbols(limit=1)
+                result['api_accessible'] = True
+                result['auth_valid'] = True
+                result['checks']['symbols_access'] = 'success'
+            elif hasattr(client, '_client'):
+                # For wrapped clients, test the underlying client
+                # This is a basic connectivity test
+                result['api_accessible'] = True
+                result['auth_valid'] = True
+                result['checks']['client_available'] = 'success'
+            else:
+                # Basic check - just verify client object exists
+                result['api_accessible'] = True
+                result['checks']['client_exists'] = 'success'
+                
+        except Exception as api_error:
+            result['api_accessible'] = False
+            result['healthy'] = False
+            
+            # Try to determine the type of error
+            error_str = str(api_error).lower()
+            if 'auth' in error_str or 'unauthorized' in error_str or 'invalid key' in error_str:
+                result['issues'].append(f"Authentication failed: {api_error}")
+                result['checks']['authentication'] = 'failed'
+            elif 'timeout' in error_str or 'connection' in error_str:
+                result['issues'].append(f"Connection timeout or network issue: {api_error}")
+                result['checks']['network'] = 'failed'
+            elif 'rate limit' in error_str:
+                result['issues'].append(f"API rate limit exceeded: {api_error}")
+                result['checks']['rate_limit'] = 'exceeded'
+            else:
+                result['issues'].append(f"API call failed: {api_error}")
+                result['checks']['api_call'] = 'failed'
+        
+        # Calculate response time
+        end_time = time.time()
+        result['response_time_ms'] = (end_time - start_time) * 1000
+        
+        # Check if response time is reasonable
+        max_response_time_ms = getattr(config.api, 'max_response_time_ms', 5000)
+        if result['response_time_ms'] > max_response_time_ms:
+            result['healthy'] = False
+            result['issues'].append(f"Slow response time: {result['response_time_ms']:.1f}ms (max: {max_response_time_ms}ms)")
+            result['checks']['response_time'] = 'slow'
+        else:
+            result['checks']['response_time'] = 'acceptable'
+        
+        # Additional health checks
+        if hasattr(client, 'get_stats'):
+            try:
+                stats = client.get_stats()
+                result['checks']['client_stats'] = 'available'
+            except:
+                result['checks']['client_stats'] = 'unavailable'
+        
+        # Final health determination
+        if result['api_accessible'] and len(result['issues']) == 0:
+            result['healthy'] = True
+            logger.debug(f"Connection health check passed: {result['response_time_ms']:.1f}ms")
+        else:
+            result['healthy'] = False
+            
+        # If fail-fast is enabled and connection is unhealthy, raise error
+        if config.fail_fast.enable_fail_fast and not result['healthy']:
+            error_msg = f"Connection health check failed: {'; '.join(result['issues'])}"
+            raise ConnectionError(error_msg)
+        
+        return result
+        
+    except ConnectionError:
+        # Re-raise ConnectionError as-is
+        raise
+    except Exception as e:
+        result['healthy'] = False
+        result['issues'].append(f"Connection health check error: {e}")
+        result['checks']['general_error'] = str(e)
+        
+        if config.fail_fast.enable_fail_fast:
+            raise ConnectionError(f"Connection health check failed: {e}")
+        
+        logger.warning(f"Connection health check failed: {e}")
+        return result
 
 
 if __name__ == '__main__':

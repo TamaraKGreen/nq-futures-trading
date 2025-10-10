@@ -17,11 +17,10 @@ import pandas as pd
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from data.collectors.cached_databento_client import CachedDatabentoClient
-from data.collectors.databento_client import DatabentoClient
+from nq_futures_system.data.collectors.cached_databento_client import CachedDatabentoClient
+from nq_futures_system.data.collectors.databento_client import DatabentoClient
+from nq_futures_system.config.settings import get_config
+from nq_futures_system.utils.validators import ValidationError
 
 
 class MockTradingStrategy:
@@ -298,11 +297,22 @@ def run_backtesting_workflow_test():
     print("BACKTESTING WORKFLOW CACHE EFFICIENCY TEST")
     print("="*60)
     
-    # Check for API key
-    api_key = os.getenv('DATABENTO_API_KEY')
-    if not api_key:
-        print("❌ DATABENTO_API_KEY environment variable not set")
+    # Validate configuration
+    config = get_config()
+    validation = config.validate_config()
+    
+    if not validation['valid']:
+        print("❌ Configuration validation failed:")
+        for issue in validation['issues']:
+            print(f"   - {issue}")
         return False
+    
+    if validation['warnings']:
+        print("⚠️  Configuration warnings:")
+        for warning in validation['warnings']:
+            print(f"   - {warning}")
+    
+    api_key = os.getenv('DATABENTO_API_KEY')
     
     print("🚀 Testing cache efficiency with realistic trading strategy development workflow...")
     

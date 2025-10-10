@@ -19,11 +19,10 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from production_system import TradingSystem
-from deployment.rollback_procedures import RollbackManager
+from nq_futures_system.production_system import TradingSystem
+from nq_futures_system.deployment.rollback_procedures import RollbackManager
+from nq_futures_system.config.settings import get_config
+from nq_futures_system.utils.validators import ValidationError
 import logging
 
 # Configure logging
@@ -85,15 +84,28 @@ class SystemValidator:
         result['checks']['python_version'] = python_version
         print(f"   ✅ Python version: {python_version}")
         
-        # Check API key
-        api_key = os.getenv('DATABENTO_API_KEY')
-        if api_key:
-            result['checks']['api_key'] = f"Set ({len(api_key)} chars)"
-            print(f"   ✅ API key: Present ({len(api_key)} characters)")
+        # Check configuration (including API key)
+        config = get_config()
+        validation = config.validate_config()
+        
+        if validation['valid']:
+            api_key = os.getenv('DATABENTO_API_KEY')
+            if api_key:
+                result['checks']['api_key'] = f"Set ({len(api_key)} chars)"
+                print(f"   ✅ API key: Present ({len(api_key)} characters)")
         else:
             result['status'] = 'fail'
-            result['issues'].append("DATABENTO_API_KEY not set")
-            print(f"   ❌ API key: Missing")
+            # Add all validation issues
+            for issue in validation['issues']:
+                result['issues'].append(issue)
+                if "DATABENTO_API_KEY" in issue:
+                    print(f"   ❌ API key: Missing")
+                else:
+                    print(f"   ❌ {issue}")
+        
+        # Print warnings if any
+        for warning in validation.get('warnings', []):
+            print(f"   ⚠️  {warning}")
         
         # Check required packages
         required_packages = ['databento', 'pandas', 'asyncio', 'threading']

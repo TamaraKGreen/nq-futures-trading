@@ -4,14 +4,10 @@ Test Databento integration with historical data that we have access to.
 This version uses data from 2-3 months ago which is accessible with the current API key.
 """
 
-import sys
 import os
 from datetime import datetime, timedelta
 
-# Add the project directory to Python path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from data.collectors.databento_client import DatabentoClient
+from nq_futures_system.data.collectors.databento_client import DatabentoClient
 import logging
 
 # Set up logging

@@ -1,0 +1,77 @@
+2025-10-10 03:36:00,764 - nq_futures_system.config.settings - INFO - Configuration loaded successfully
+2025-10-10 03:36:38,272 - nq_futures_system.config.settings - INFO - Configuration loaded successfully
+2025-10-10 03:37:10,914 - nq_futures_system.config.settings - INFO - Configuration loaded successfully
+2025-10-10 03:37:10,914 - nq_futures_system.production_system - INFO - Initializing NQ Futures Trading System...
+2025-10-10 03:37:10,915 - nq_futures_system.data.collectors.databento_client - INFO - Using API key: db-B9Kv7nB... (total length: 32)
+2025-10-10 03:37:10,916 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,916 - nq_futures_system.data.collectors.cached_databento_client - INFO - CachedDatabentoClient initialized with cache at data/cache
+2025-10-10 03:37:10,916 - nq_futures_system.data.live.live_buffer - INFO - LiveDataBuffer initialized: max_size=100000, max_age=3600s
+2025-10-10 03:37:10,916 - nq_futures_system.data.live.live_manager - INFO - LiveDataManager initialized: max_streams=5
+2025-10-10 03:37:10,916 - nq_futures_system.data.unified_data_coordinator - INFO - UnifiedDataCoordinator initialized
+2025-10-10 03:37:10,917 - nq_futures_system.monitoring.performance_monitor - INFO - MetricsCollector initialized with max_history=10000
+2025-10-10 03:37:10,917 - nq_futures_system.monitoring.performance_monitor - INFO - AlertManager initialized with max_alerts=1000
+2025-10-10 03:37:10,917 - nq_futures_system.monitoring.performance_monitor - INFO - PerformanceMonitor initialized: monitoring/metrics
+2025-10-10 03:37:10,917 - nq_futures_system.monitoring.cost_tracker - INFO - CostTracker initialized: monitoring/costs
+2025-10-10 03:37:10,918 - nq_futures_system.data.collectors.databento_client - INFO - Using API key: db-B9Kv7nB... (total length: 32)
+2025-10-10 03:37:10,918 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,918 - nq_futures_system.data.collectors.cached_databento_client - INFO - CachedDatabentoClient initialized with cache at data/cache
+2025-10-10 03:37:10,918 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,919 - nq_futures_system.utils.validators - INFO - StrictModeEnforcer initialized: strict_mode=False
+2025-10-10 03:37:10,919 - nq_futures_system.production_system - INFO - ✅ Trading system initialized successfully
+2025-10-10 03:37:10,919 - nq_futures_system.production_system - INFO - Initializing NQ Futures Trading System...
+2025-10-10 03:37:10,919 - nq_futures_system.data.collectors.databento_client - INFO - Using API key: db-B9Kv7nB... (total length: 32)
+2025-10-10 03:37:10,920 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,920 - nq_futures_system.data.collectors.cached_databento_client - INFO - CachedDatabentoClient initialized with cache at data/cache
+2025-10-10 03:37:10,920 - nq_futures_system.data.live.live_buffer - INFO - LiveDataBuffer initialized: max_size=100000, max_age=3600s
+2025-10-10 03:37:10,920 - nq_futures_system.data.live.live_manager - INFO - LiveDataManager initialized: max_streams=5
+2025-10-10 03:37:10,920 - nq_futures_system.data.unified_data_coordinator - INFO - UnifiedDataCoordinator initialized
+2025-10-10 03:37:10,920 - nq_futures_system.monitoring.cost_tracker - INFO - CostTracker initialized: monitoring/costs
+2025-10-10 03:37:10,920 - nq_futures_system.data.collectors.databento_client - INFO - Using API key: db-B9Kv7nB... (total length: 32)
+2025-10-10 03:37:10,921 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,921 - nq_futures_system.data.collectors.cached_databento_client - INFO - CachedDatabentoClient initialized with cache at data/cache
+2025-10-10 03:37:10,921 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,921 - nq_futures_system.utils.validators - INFO - StrictModeEnforcer initialized: strict_mode=False
+2025-10-10 03:37:10,921 - nq_futures_system.production_system - INFO - ✅ Trading system initialized successfully
+2025-10-10 03:37:10,922 - nq_futures_system.production_system - INFO - Initializing NQ Futures Trading System...
+2025-10-10 03:37:10,922 - nq_futures_system.data.collectors.databento_client - INFO - Using API key: db-B9Kv7nB... (total length: 32)
+2025-10-10 03:37:10,923 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,923 - nq_futures_system.data.collectors.cached_databento_client - INFO - CachedDatabentoClient initialized with cache at data/cache
+2025-10-10 03:37:10,923 - nq_futures_system.data.live.live_buffer - INFO - LiveDataBuffer initialized: max_size=100000, max_age=3600s
+2025-10-10 03:37:10,923 - nq_futures_system.data.live.live_manager - INFO - LiveDataManager initialized: max_streams=5
+2025-10-10 03:37:10,923 - nq_futures_system.data.unified_data_coordinator - INFO - UnifiedDataCoordinator initialized
+2025-10-10 03:37:10,924 - nq_futures_system.monitoring.cost_tracker - INFO - CostTracker initialized: monitoring/costs
+2025-10-10 03:37:10,924 - nq_futures_system.data.collectors.databento_client - INFO - Using API key: db-B9Kv7nB... (total length: 32)
+2025-10-10 03:37:10,924 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,924 - nq_futures_system.data.collectors.cached_databento_client - INFO - CachedDatabentoClient initialized with cache at data/cache
+2025-10-10 03:37:10,924 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:10,925 - nq_futures_system.utils.validators - INFO - StrictModeEnforcer initialized: strict_mode=False
+2025-10-10 03:37:10,925 - nq_futures_system.production_system - INFO - ✅ Trading system initialized successfully
+2025-10-10 03:37:10,925 - nq_futures_system.data.unified_data_coordinator - INFO - 🎯 UNIFIED GET_DATA: NQU4 from 2024-08-01 14:00:00 to 2024-08-01 14:30:00
+2025-10-10 03:37:10,925 - nq_futures_system.data.unified_data_coordinator - INFO -    Live cutoff: 2025-10-10 02:37:10.925652
+2025-10-10 03:37:10,925 - nq_futures_system.data.unified_data_coordinator - INFO -    📚 Strategy: Historical data only
+2025-10-10 03:37:10,926 - nq_futures_system.data.collectors.cached_databento_client - INFO - Checking cache for ['NQU4'] ohlcv-1m 2024-08-01 14:00:00 to 2024-08-01 14:30:00
+2025-10-10 03:37:10,926 - nq_futures_system.data.cache.cache_manager - INFO - Cache MISS: ['NQU4'] ohlcv-1m
+2025-10-10 03:37:10,926 - nq_futures_system.data.collectors.cached_databento_client - INFO - 🌐 Cache MISS - Fetching from Databento API...
+2025-10-10 03:37:10,926 - databento.historical.client - INFO - Initialized Historical(gateway=https://hist.databento.com)
+2025-10-10 03:37:12,592 - nq_futures_system.data.collectors.databento_client - INFO - Retrieved 30 historical records for ['NQU4']
+2025-10-10 03:37:12,602 - nq_futures_system.data.cache.cache_manager - INFO - Cached 30 records (0.0 MB): ['NQU4'] ohlcv-1m
+2025-10-10 03:37:12,602 - nq_futures_system.data.collectors.cached_databento_client - INFO - 💾 Cached 30 records for future use
+2025-10-10 03:37:12,602 - nq_futures_system.data.unified_data_coordinator - INFO -    ✅ Returned 30 records in 1.677s
+2025-10-10 03:37:12,603 - nq_futures_system.production_system - INFO - Initializing NQ Futures Trading System...
+2025-10-10 03:37:12,603 - nq_futures_system.data.collectors.databento_client - INFO - Using API key: db-B9Kv7nB... (total length: 32)
+2025-10-10 03:37:12,603 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:12,604 - nq_futures_system.data.collectors.cached_databento_client - INFO - CachedDatabentoClient initialized with cache at data/cache
+2025-10-10 03:37:12,604 - nq_futures_system.data.live.live_buffer - INFO - LiveDataBuffer initialized: max_size=100000, max_age=3600s
+2025-10-10 03:37:12,604 - nq_futures_system.data.live.live_manager - INFO - LiveDataManager initialized: max_streams=5
+2025-10-10 03:37:12,604 - nq_futures_system.data.unified_data_coordinator - INFO - UnifiedDataCoordinator initialized
+2025-10-10 03:37:12,604 - nq_futures_system.monitoring.cost_tracker - INFO - CostTracker initialized: monitoring/costs
+2025-10-10 03:37:12,605 - nq_futures_system.data.collectors.databento_client - INFO - Using API key: db-B9Kv7nB... (total length: 32)
+2025-10-10 03:37:12,605 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:12,605 - nq_futures_system.data.collectors.cached_databento_client - INFO - CachedDatabentoClient initialized with cache at data/cache
+2025-10-10 03:37:12,605 - nq_futures_system.data.cache.cache_manager - INFO - Cache directories ready: data/cache
+2025-10-10 03:37:12,606 - nq_futures_system.utils.validators - INFO - StrictModeEnforcer initialized: strict_mode=False
+2025-10-10 03:37:12,606 - nq_futures_system.production_system - INFO - ✅ Trading system initialized successfully
+2025-10-10 03:44:49,502 - nq_futures_system.config.settings - INFO - Configuration loaded successfully
+2025-10-10 03:44:49,502 - nq_futures_system.utils.validators - INFO - StrictModeEnforcer initialized: strict_mode=False
+2025-10-10 03:44:58,635 - nq_futures_system.config.settings - INFO - Configuration loaded successfully
+2025-10-10 03:44:58,635 - nq_futures_system.utils.validators - INFO - StrictModeEnforcer initialized: strict_mode=True

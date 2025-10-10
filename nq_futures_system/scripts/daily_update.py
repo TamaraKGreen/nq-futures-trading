@@ -21,11 +21,10 @@ import logging
 from datetime import datetime, date, timedelta
 from typing import List, Optional
 
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from data.collectors.cached_databento_client import CachedDatabentoClient
-from data.cache.cache_manager import IncrementalCacheManager
+from nq_futures_system.data.collectors.cached_databento_client import CachedDatabentoClient
+from nq_futures_system.data.cache.cache_manager import IncrementalCacheManager
+from nq_futures_system.config.settings import get_config
+from nq_futures_system.utils.validators import ValidationError
 
 
 class DailyDataUpdater:
@@ -292,11 +291,20 @@ def main():
     
     args = parser.parse_args()
     
-    # Check for API key
-    if not os.getenv('DATABENTO_API_KEY'):
-        print("❌ Error: DATABENTO_API_KEY environment variable not set")
-        print("   Please set your Databento API key in the environment")
+    # Validate configuration
+    config = get_config()
+    validation = config.validate_config()
+    
+    if not validation['valid']:
+        print("❌ Configuration validation failed:")
+        for issue in validation['issues']:
+            print(f"   - {issue}")
         sys.exit(1)
+    
+    if validation['warnings']:
+        print("⚠️  Configuration warnings:")
+        for warning in validation['warnings']:
+            print(f"   - {warning}")
     
     try:
         # Create updater

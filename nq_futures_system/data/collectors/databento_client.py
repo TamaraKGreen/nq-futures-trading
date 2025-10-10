@@ -12,6 +12,9 @@ import databento as db
 from dotenv import load_dotenv
 import logging
 
+# Import typed exceptions
+from nq_futures_system.utils.validators import ConfigurationError, APIValidationError
+
 # Helper function for UTC now that works in all Python versions
 def utc_now():
     """Get current UTC time in a way that works for all Python versions."""
@@ -40,7 +43,7 @@ class DatabentoClient:
         """
         self.api_key = api_key or os.getenv('DATABENTO_API_KEY')
         if not self.api_key:
-            raise ValueError("No Databento API key found. Set DATABENTO_API_KEY environment variable.")
+            raise ConfigurationError("No Databento API key found. Set DATABENTO_API_KEY environment variable.")
         logger.info(f"Using API key: {self.api_key[:10]}... (total length: {len(self.api_key)})")
         
         self._live_client = None
@@ -252,7 +255,7 @@ class DatabentoClient:
             if futures:
                 return futures[0]['symbol']
             else:
-                raise ValueError(f"No futures contracts found for {base_symbol}")
+                raise APIValidationError(f"No futures contracts found for {base_symbol}")
                 
         except Exception as e:
             logger.error(f"Failed to get continuous contract: {e}")

@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import List, Optional
 
 # Import the existing client
-from data.collectors.databento_client import DatabentoClient
+from nq_futures_system.data.collectors.databento_client import DatabentoClient
 
 
 class CachedDatabentoClient(DatabentoClient):
@@ -220,8 +220,4 @@ def demonstrate_cost_savings():
 
 
 if __name__ == "__main__":
-    # Add parent directory to path
-    import sys
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    
     demonstrate_cost_savings()

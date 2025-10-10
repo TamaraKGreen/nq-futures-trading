@@ -15,11 +15,8 @@ from datetime import datetime
 from typing import List, Optional
 import logging
 
-# Add parent directory to path to import cache manager
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from data.collectors.databento_client import DatabentoClient
-from data.cache.cache_manager import IncrementalCacheManager
+from nq_futures_system.data.collectors.databento_client import DatabentoClient
+from nq_futures_system.data.cache.cache_manager import IncrementalCacheManager
 
 logger = logging.getLogger(__name__)
 

@@ -21,11 +21,9 @@ from enum import Enum
 # Add parent directory to path
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-from data.live.live_buffer import LiveDataBuffer, LiveTick
-from data.collectors.databento_client import DatabentoClient
-from config.settings import get_config
+from nq_futures_system.data.live.live_buffer import LiveDataBuffer, LiveTick
+from nq_futures_system.data.collectors.databento_client import DatabentoClient
+from nq_futures_system.config.settings import get_config
 
 logger = logging.getLogger(__name__)
 

@@ -17,11 +17,10 @@ import os
 import sys
 import time
 
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from data.collectors.cached_databento_client import CachedDatabentoClient, create_cached_client
-from data.collectors.databento_client import DatabentoClient
+from nq_futures_system.data.collectors.cached_databento_client import CachedDatabentoClient, create_cached_client
+from nq_futures_system.data.collectors.databento_client import DatabentoClient
+from nq_futures_system.config.settings import get_config
+from nq_futures_system.utils.validators import ValidationError
 
 
 class TestCachedDatabentoClientIntegration(unittest.TestCase):
@@ -30,12 +29,17 @@ class TestCachedDatabentoClientIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up class-level test environment."""
-        # Check if API key is available
-        api_key = os.getenv('DATABENTO_API_KEY')
-        if not api_key:
-            raise unittest.SkipTest("DATABENTO_API_KEY environment variable not set")
+        # Validate configuration
+        config = get_config()
+        validation = config.validate_config()
         
-        cls.api_key = api_key
+        if not validation['valid']:
+            # In test context, skip tests if validation fails
+            error_msg = "Configuration validation failed: "
+            error_msg += ", ".join(validation['issues'])
+            raise unittest.SkipTest(error_msg)
+        
+        cls.api_key = os.getenv('DATABENTO_API_KEY')
         
         # Test dates (using historical data we know works)
         cls.test_symbols = ['NQU4']
@@ -272,11 +276,20 @@ def run_integration_tests():
     print("CACHED DATABENTO CLIENT INTEGRATION TESTS")
     print("=" * 60)
     
-    # Check for API key
-    if not os.getenv('DATABENTO_API_KEY'):
-        print("❌ DATABENTO_API_KEY environment variable not set")
-        print("   Please set your API key to run integration tests")
+    # Validate configuration
+    config = get_config()
+    validation = config.validate_config()
+    
+    if not validation['valid']:
+        print("❌ Configuration validation failed:")
+        for issue in validation['issues']:
+            print(f"   - {issue}")
         return False
+    
+    if validation['warnings']:
+        print("⚠️  Configuration warnings:")
+        for warning in validation['warnings']:
+            print(f"   - {warning}")
     
     # Run the tests
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCachedDatabentoClientIntegration)

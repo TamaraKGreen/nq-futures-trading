@@ -1,0 +1,18 @@
+{
+  "cache_files": {
+    "data/NQU4/NQU4_20240801_20240801_ohlcv-1m.parquet": {
+      "symbols": [
+        "NQU4"
+      ],
+      "start": "2024-08-01T14:00:00",
+      "end": "2024-08-01T14:30:00",
+      "schema": "ohlcv-1m",
+      "rows": 30,
+      "cached_at": "2025-10-10T03:37:12.602224",
+      "file_size": 7298
+    }
+  },
+  "daily_files": {},
+  "last_update": null,
+  "version": "1.0"
+}

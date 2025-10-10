@@ -3,14 +3,10 @@
 Check how far back tick data goes and verify NQ price levels.
 """
 
-import sys
 import os
 from datetime import datetime, timedelta
 
-# Add the project directory to Python path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from data.collectors.databento_client import DatabentoClient
+from nq_futures_system.data.collectors.databento_client import DatabentoClient
 import logging
 
 # Set up logging

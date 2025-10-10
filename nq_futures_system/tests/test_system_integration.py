@@ -19,16 +19,14 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from data.unified_data_coordinator import UnifiedDataCoordinator, create_coordinator
-from monitoring.performance_monitor import PerformanceMonitor, get_performance_monitor
-from monitoring.cost_tracker import CostTracker, create_cost_tracker
-from config.settings import ConfigManager, get_config
-from data.live.live_buffer import LiveDataBuffer, LiveTick, create_sample_ticks
-from utils.gap_detector import GapDetector
-from utils.cache_cleanup import CacheCleanupManager
+from nq_futures_system.data.unified_data_coordinator import UnifiedDataCoordinator, create_coordinator
+from nq_futures_system.monitoring.performance_monitor import PerformanceMonitor, get_performance_monitor
+from nq_futures_system.monitoring.cost_tracker import CostTracker, create_cost_tracker
+from nq_futures_system.config.settings import ConfigManager, get_config
+from nq_futures_system.data.live.live_buffer import LiveDataBuffer, LiveTick, create_sample_ticks
+from nq_futures_system.utils.gap_detector import GapDetector
+from nq_futures_system.utils.validators import ValidationError
+from nq_futures_system.utils.cache_cleanup import CacheCleanupManager
 
 
 class TestSystemIntegration(unittest.TestCase):
@@ -37,12 +35,17 @@ class TestSystemIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up class-level test environment."""
-        # Check if API key is available
-        api_key = os.getenv('DATABENTO_API_KEY')
-        if not api_key:
-            raise unittest.SkipTest("DATABENTO_API_KEY environment variable not set")
+        # Validate configuration
+        config = get_config()
+        validation = config.validate_config()
         
-        cls.api_key = api_key
+        if not validation['valid']:
+            # In test context, skip tests if validation fails
+            error_msg = "Configuration validation failed: "
+            error_msg += ", ".join(validation['issues'])
+            raise unittest.SkipTest(error_msg)
+        
+        cls.api_key = os.getenv('DATABENTO_API_KEY')
     
     def setUp(self):
         """Set up test environment for each test."""
@@ -413,11 +416,20 @@ def run_comprehensive_tests():
     print("COMPREHENSIVE SYSTEM INTEGRATION TESTS")
     print("="*70)
     
-    # Check for API key
-    if not os.getenv('DATABENTO_API_KEY'):
-        print("❌ DATABENTO_API_KEY environment variable not set")
-        print("   Please set your API key to run integration tests")
+    # Validate configuration
+    config = get_config()
+    validation = config.validate_config()
+    
+    if not validation['valid']:
+        print("❌ Configuration validation failed:")
+        for issue in validation['issues']:
+            print(f"   - {issue}")
         return False
+    
+    if validation['warnings']:
+        print("⚠️  Configuration warnings:")
+        for warning in validation['warnings']:
+            print(f"   - {warning}")
     
     # Run the tests
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSystemIntegration)

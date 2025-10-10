@@ -16,6 +16,9 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 import logging
 
+# Import typed exceptions for fail-fast support
+from nq_futures_system.utils.validators import ValidationError, ConfigurationError
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,11 +64,59 @@ class TradingSettings:
     live_cutoff_hours: int = 1          # Switch to live data after 1 hour
     heartbeat_interval_seconds: int = 30
     
+    # Schema definitions for centralized access
+    schema_definitions: dict = None
+    valid_schemas: list = None
+    
     def __post_init__(self):
         if self.default_symbols is None:
             self.default_symbols = ["NQZ4", "NQH5"]
         if self.default_schemas is None:
             self.default_schemas = ["trades", "ohlcv-1m"]
+        
+        # Central schema definitions with metadata
+        if self.schema_definitions is None:
+            self.schema_definitions = {
+                "trades": {
+                    "description": "Individual trade records",
+                    "required_columns": ["ts_event", "ts_recv", "price", "size"],
+                    "cost_multiplier": 1.0,
+                    "typical_size": "large",
+                    "frequency": "tick-by-tick"
+                },
+                "ohlcv-1m": {
+                    "description": "1-minute OHLCV candlestick bars",
+                    "required_columns": ["ts_event", "open", "high", "low", "close", "volume"],
+                    "cost_multiplier": 0.1,
+                    "typical_size": "small",
+                    "frequency": "1-minute"
+                },
+                "ohlcv-1h": {
+                    "description": "1-hour OHLCV candlestick bars",
+                    "required_columns": ["ts_event", "open", "high", "low", "close", "volume"],
+                    "cost_multiplier": 0.02,
+                    "typical_size": "very_small",
+                    "frequency": "1-hour"
+                },
+                "tbbo": {
+                    "description": "Top of book bid-offer quotes",
+                    "required_columns": ["ts_event", "bid_px", "ask_px", "bid_sz", "ask_sz"],
+                    "cost_multiplier": 0.8,
+                    "typical_size": "medium",
+                    "frequency": "tick-by-tick"
+                },
+                "mbp-1": {
+                    "description": "Market by price (Level 1)",
+                    "required_columns": ["ts_event", "price", "size", "side"],
+                    "cost_multiplier": 0.6,
+                    "typical_size": "medium",
+                    "frequency": "tick-by-tick"
+                }
+            }
+            
+        # Valid schemas list for validation
+        if self.valid_schemas is None:
+            self.valid_schemas = list(self.schema_definitions.keys())
 
 
 @dataclass
@@ -271,7 +322,11 @@ class ConfigManager:
         
         # Check required environment variables
         if not os.getenv('DATABENTO_API_KEY'):
-            issues.append("DATABENTO_API_KEY environment variable not set")
+            error_msg = "DATABENTO_API_KEY environment variable not set"
+            if self.fail_fast.enable_fail_fast:
+                raise ConfigurationError(f"FAIL-FAST: {error_msg}")
+            else:
+                issues.append(error_msg)
         
         # Validate cache directory
         cache_dir = Path(self.cache.cache_dir)

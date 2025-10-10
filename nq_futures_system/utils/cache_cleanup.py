@@ -21,10 +21,7 @@ from typing import List, Dict, Optional, Tuple
 from pathlib import Path
 import json
 
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from data.cache.cache_manager import CacheManager, IncrementalCacheManager
+from nq_futures_system.data.cache.cache_manager import CacheManager, IncrementalCacheManager
 
 
 class CacheCleanupManager:

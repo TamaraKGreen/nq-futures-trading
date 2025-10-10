@@ -22,12 +22,10 @@ import threading
 # Add parent directory to path
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from data.collectors.cached_databento_client import CachedDatabentoClient
-from data.live.live_buffer import LiveDataBuffer, LiveTick
-from data.live.live_manager import LiveDataManager, SubscriptionConfig
-from config.settings import get_config
+from nq_futures_system.data.collectors.cached_databento_client import CachedDatabentoClient
+from nq_futures_system.data.live.live_buffer import LiveDataBuffer, LiveTick
+from nq_futures_system.data.live.live_manager import LiveDataManager, SubscriptionConfig
+from nq_futures_system.config.settings import get_config
 
 logger = logging.getLogger(__name__)
 
